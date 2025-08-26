@@ -1,0 +1,15 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install Flask
+RUN pip install flask requests
+
+# Copy application
+COPY simple_mcp_server.py .
+
+# Expose port
+EXPOSE 8080
+
+# Run the application
+CMD ["python", "simple_mcp_server.py"]

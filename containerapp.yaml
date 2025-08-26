@@ -1,0 +1,30 @@
+
+apiVersion: apps/v1
+kind: containerapp
+metadata:
+  name: mcpweather-qwzxxz
+  resourceGroup: rg-mcp-qwzxxz
+  location: eastus
+spec:
+  managedEnvironmentId: /subscriptions/4a7af4bd-c25a-49e7-a200-a88f1575fb97/resourceGroups/rg-mcp-qwzxxz/providers/Microsoft.App/managedEnvironments/mcpenv-qwzxxz
+  configuration:
+    ingress:
+      external: true
+      targetPort: 80
+    registries:
+    - server: acrmcpqwzxxz.azurecr.io
+  username: <YOUR_REGISTRY_USERNAME>
+  passwordSecretRef: <YOUR_PASSWORD_SECRET_REF>
+    secrets:
+  - name: <YOUR_PASSWORD_SECRET_NAME>
+      value: "SPsNWXVWaWiabZjkLJF2Sd1Zlv+VG2PYFIVF57lMNh+ACRCKeo8a"
+  template:
+    containers:
+    - name: mcp-weather
+      image: acrmcpqwzxxz.azurecr.io/mcp-weather:latest
+      resources:
+        cpu: 0.25
+        memory: 0.5Gi
+    scale:
+      minReplicas: 1
+      maxReplicas: 3

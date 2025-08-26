@@ -1,0 +1,17 @@
+📦 What you have in your Container App:
+MCP Weather Server - A FastAPI server that implements the Model Context Protocol (MCP)
+JSON-RPC 2.0 Endpoint - Responds to calls with the get_weather method
+Static weather data for cities like Milan, Rome, London, Lisbon
+Health endpoint to verify service status
+🔗 Your deployment architecture:
+
+AI Foundry Agent → APIM Gateway → Container Apps → MCP Server                    ↓               JSON-RPC 2.0 Protocol                    ↓            Custom Weather Response
+📁 Your Container App contains:
+main.py - The MCP server with FastAPI
+Dockerfile - Container configuration
+requirements.txt - Python dependencies
+✅ Verify it's working:
+Your MCP Server in the Container App should respond to:
+
+Health check: GET /health
+Weather API: POST / with JSON-RPC payload

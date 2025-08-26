@@ -1,0 +1,17 @@
+
+PARAMETRI PER DEPLOY MANUALE CONTAINER APP:
+
+Resource Group: rg-mcp-qwzxxz
+App Name: mcpweather-qwzxxz
+Environment: mcpenv-qwzxxz
+Image: acrmcpqwzxxz.azurecr.io/mcp-weather:latest
+Registry Server: acrmcpqwzxxz.azurecr.io
+Registry Username: <YOUR_REGISTRY_USERNAME>
+Registry Password: <YOUR_REGISTRY_PASSWORD>
+Target Port: 80
+Ingress: External
+CPU: 0.25
+Memory: 0.5Gi
+Location: eastus
+
+URL Portal: https://portal.azure.com

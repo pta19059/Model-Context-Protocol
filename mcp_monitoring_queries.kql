@@ -1,0 +1,56 @@
+// mcp_pipeline_health
+
+// MCP Pipeline Health Dashboard
+let timeRange = ago(1h);
+let apimLogs = ApiManagementGatewayLogs
+| where TimeGenerated > timeRange
+| where Url contains "mcp";
+
+let containerLogs = ContainerInstanceLog_CL
+| where TimeGenerated > timeRange
+| where ContainerName_s contains "mcp";
+
+// Request flow analysis
+apimLogs
+| summarize 
+    TotalRequests = count(),
+    SuccessfulRequests = countif(ResponseCode < 400),
+    ErrorRequests = countif(ResponseCode >= 400),
+    AvgResponseTime = avg(DurationMs)
+| extend SuccessRate = SuccessfulRequests * 100.0 / TotalRequests
+| project TotalRequests, SuccessRate, AvgResponseTime, ErrorRequests
+            
+
+// mcp_tool_usage
+
+// MCP Tool Usage Analytics
+ApiManagementGatewayLogs
+| where TimeGenerated > ago(24h)
+| where Url contains "mcp/tools/call"
+| extend RequestBody = parse_json(RequestBody)
+| extend ToolName = tostring(RequestBody.params.name)
+| extend Location = tostring(RequestBody.params.arguments.location)
+| summarize 
+    CallCount = count(),
+    UniqueLocations = dcount(Location)
+    by ToolName
+| order by CallCount desc
+            
+
+// performance_monitoring
+
+// Performance Monitoring
+union 
+(ApiManagementGatewayLogs 
+| where TimeGenerated > ago(1h)
+| summarize avg(DurationMs) by bin(TimeGenerated, 5m)
+| extend Component = "APIM"),
+(ContainerInstanceLog_CL
+| where TimeGenerated > ago(1h) 
+| where Message contains "Duration"
+| extend Duration = extract(@"Duration: ([0-9.]+)", 1, Message)
+| summarize avg(todouble(Duration)*1000) by bin(TimeGenerated, 5m)
+| extend Component = "MCP Server")
+| render timechart
+            
+

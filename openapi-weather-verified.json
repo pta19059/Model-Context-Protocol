@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MCP Weather API",
+    "version": "1.0.0",
+    "description": "Weather information service using Model Context Protocol (MCP)"
+  },
+  "servers": [
+    {
+      "url": "https://apim-76ril8.azure-api.net/mcp",
+      "description": "MCP Server URL"
+    }
+  ],
+  "paths": {
+    "/": {
+      "post": {
+        "operationId": "getWeather",
+        "summary": "Get weather information by city name",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "jsonrpc",
+                  "method",
+                  "params",
+                  "id"
+                ],
+                "properties": {
+                  "jsonrpc": {
+                    "type": "string",
+                    "enum": [
+                      "2.0"
+                    ]
+                  },
+                  "method": {
+                    "type": "string",
+                    "enum": [
+                      "get_weather",
+                      "getWeather"
+                    ]
+                  },
+                  "params": {
+                    "type": "object",
+                    "required": [
+                      "city"
+                    ],
+                    "properties": {
+                      "city": {
+                        "type": "string",
+                        "example": "milan"
+                      }
+                    }
+                  },
+                  "id": {
+                    "type": "integer",
+                    "example": 1
+                  }
+                }
+              },
+              "examples": {
+                "weather": {
+                  "value": {
+                    "jsonrpc": "2.0",
+                    "method": "get_weather",
+                    "params": {
+                      "city": "milan"
+                    },
+                    "id": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Weather information retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jsonrpc": {
+                      "type": "string"
+                    },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "city": {
+                          "type": "string"
+                        },
+                        "temperature": {
+                          "type": "string"
+                        },
+                        "condition": {
+                          "type": "string"
+                        },
+                        "humidity": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "id": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "examples": {
+                  "response": {
+                    "value": {
+                      "jsonrpc": "2.0",
+                      "result": {
+                        "city": "Milan",
+                        "temperature": "22\u00b0C",
+                        "condition": "Partly cloudy",
+                        "humidity": "65%"
+                      },
+                      "id": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

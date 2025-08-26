@@ -1,0 +1,78 @@
+<policies>
+    <inbound>
+        <base />
+        <!-- Route to Real MCP Server -->
+        <set-backend-service base-url="https://mcp-weather-1onhmd.purpleflower-1b791e7b.eastus.azurecontainerapps.io" />
+
+        <!-- MCP Protocol Headers -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+        <set-header name="Accept" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+
+        <!-- CORS for MCP integration -->
+        <cors allow-credentials="false">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+                <method>OPTIONS</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+        </cors>
+
+        <!-- Log MCP requests -->
+        <log-to-eventhub logger-id="mcp-logger" partition-id="0">
+            <message>MCP Request: @(context.Request.Method) @(context.Request.Url)</message>
+        </log-to-eventhub>
+    </inbound>
+    <backend>
+        <base />
+        <!-- Timeout for MCP operations -->
+        <timeout>30</timeout>
+    </backend>
+    <outbound>
+        <base />
+        <!-- Ensure JSON response -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json; charset=utf-8</value>
+        </set-header>
+
+        <!-- Add MCP protocol version header -->
+        <set-header name="X-MCP-Protocol-Version" exists-action="override">
+            <value>2024-11-05</value>
+        </set-header>
+
+        <!-- Log MCP responses -->
+        <log-to-eventhub logger-id="mcp-logger" partition-id="0">
+            <message>MCP Response: @(context.Response.StatusCode)</message>
+        </log-to-eventhub>
+    </outbound>
+    <on-error>
+        <base />
+        <!-- MCP error handling -->
+        <set-variable name="mcp-error" value="@{
+            return new JObject(
+                new JProperty(\"jsonrpc\", \"2.0\"),
+                new JProperty(\"error\", new JObject(
+                    new JProperty(\"code\", -32603),
+                    new JProperty(\"message\", \"MCP Server Error\")
+                )),
+                new JProperty(\"id\", null)
+            ).ToString();
+        }" />
+        <return-response>
+            <set-status code="500" reason="MCP Server Error" />
+            <set-header name="Content-Type" exists-action="override">
+                <value>application/json</value>
+            </set-header>
+            <set-body>@(context.Variables[\"mcp-error\"])</set-body>
+        </return-response>
+    </on-error>
+</policies>
